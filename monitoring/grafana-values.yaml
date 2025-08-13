@@ -1,0 +1,3 @@
+# Example Grafana tweaks
+adminUser: admin
+adminPassword: prom-operator

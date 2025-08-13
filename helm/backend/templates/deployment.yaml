@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-backend
+  labels:
+    app: ecommerce-backend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ecommerce-backend
+  template:
+    metadata:
+      labels:
+        app: ecommerce-backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_HOST
+              value: "{{ .Values.env.DB_HOST }}"
+            - name: DB_USER
+              value: "{{ .Values.env.DB_USER }}"
+            - name: DB_PASS
+              value: "{{ .Values.env.DB_PASS }}"
+            - name: DB_NAME
+              value: "{{ .Values.env.DB_NAME }}"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10

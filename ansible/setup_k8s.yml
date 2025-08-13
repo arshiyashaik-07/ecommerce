@@ -1,0 +1,35 @@
+---
+- name: Prepare local kubernetes tooling and monitoring
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Ensure kubectl installed (skip if present)
+      shell: |
+        if ! command -v kubectl >/dev/null 2>&1; then
+          curl -L -o /tmp/kubectl "https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
+        fi
+      become: yes
+
+    - name: Ensure helm installed (skip if present)
+      shell: |
+        if ! command -v helm >/dev/null 2>&1; then
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        fi
+      become: yes
+
+    - name: Create namespaces
+      shell: |
+        kubectl get ns ecommerce >/dev/null 2>&1 || kubectl create ns ecommerce
+        kubectl get ns monitoring >/dev/null 2>&1 || kubectl create ns monitoring
+
+    - name: Add prometheus-community repo
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+      changed_when: "'... already exists' not in result.stdout"
+
+    - name: Repo update
+      shell: helm repo update
+
+    - name: Install/upgrade kube-prometheus-stack
+      shell: |
+        helm upgrade --install monitoring prometheus-community/kube-prometheus-stack           -n monitoring

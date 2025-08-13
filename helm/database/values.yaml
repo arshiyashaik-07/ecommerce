@@ -1,0 +1,13 @@
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+mysql:
+  rootPassword: rootpw
+  database: ecommerce
+  user: ecommerce
+  password: ecommercepw
+
+storage:
+  size: 1Gi

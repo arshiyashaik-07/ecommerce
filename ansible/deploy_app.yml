@@ -1,0 +1,15 @@
+---
+- name: Deploy ecommerce umbrella chart
+  hosts: local
+  gather_facts: false
+  tasks:
+    - name: Build local chart dependencies
+      shell: helm dependency update ./helm/ecommerce
+      args:
+        chdir: "{{ playbook_dir }}/.."
+
+    - name: Deploy or upgrade ecommerce
+      shell: |
+        helm upgrade --install ecommerce ./helm/ecommerce -n ecommerce           --set backend.image.repository=ecommerce-backend           --set backend.image.tag=1.0           --set frontend.image.repository=ecommerce-frontend           --set frontend.image.tag=1.0
+      args:
+        chdir: "{{ playbook_dir }}/.."

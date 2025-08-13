@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: ecommerce-frontend
+  tag: "1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: null
+
+ingress:
+  enabled: false
+  className: ""
+  hosts:
+    - host: ecommerce.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: ecommerce-backend
+  tag: "1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+
+env:
+  DB_HOST: ecommerce-mysql
+  DB_USER: ecommerce
+  DB_PASS: ecommercepw
+  DB_NAME: ecommerce
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 10s

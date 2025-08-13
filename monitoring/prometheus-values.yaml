@@ -1,0 +1,6 @@
+# You can customize kube-prometheus-stack here if needed.
+# For example, to reduce resource usage for local dev.
+prometheus:
+  prometheusSpec:
+    retention: 2d
+    scrapeInterval: "15s"

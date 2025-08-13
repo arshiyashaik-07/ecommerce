@@ -1,0 +1,4 @@
+# Values to bubble down to subcharts if needed
+backend: {}
+frontend: {}
+database: {}

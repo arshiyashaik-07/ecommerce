@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ecommerce Frontend</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;max-width:760px;margin:2rem auto;padding:0 1rem}
+    header{display:flex;justify-content:space-between;align-items:center}
+    .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}
+    button{padding:8px 12px;border-radius:8px;border:1px solid #ccc;cursor:pointer}
+    code{background:#f5f5f5;padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🛒 E‑commerce Demo</h1>
+    <small>Frontend → Backend → MySQL</small>
+  </header>
+  <div class="card">
+    <p><b>Products</b></p>
+    <div id="products">Loading...</div>
+    <p><button onclick="placeOrder()">Place Test Order</button></p>
+    <p><small>Backend service: <code>ecommerce-backend:5000</code></small></p>
+  </div>
+  <div class="card">
+    <p><b>Observability</b></p>
+    <ul>
+      <li>Prometheus scrapes <code>/metrics</code> from backend via <code>ServiceMonitor</code></li>
+      <li>Grafana → add Prometheus datasource automatically via kube-prometheus-stack</li>
+    </ul>
+  </div>
+  <script>
+    async function loadProducts(){
+      try {
+        const res = await fetch('/api/products', {headers:{'X-Forwarded-Host':'frontend'}}).catch(()=>null);
+        if (!res || !res.ok) throw new Error('Direct call failed; trying service DNS');
+        const data = await res.json();
+        renderProducts(data);
+      } catch (e) {
+        // fallback to backend service DNS (works inside cluster via port-forward or Ingress rewrite)
+        try {
+          const res = await fetch('http://ecommerce-backend:5000/api/products');
+          const data = await res.json();
+          renderProducts(data);
+        } catch (e2) {
+          document.getElementById('products').innerText = 'Failed to load: ' + e2.message;
+        }
+      }
+    }
+    function renderProducts(items){
+      document.getElementById('products').innerHTML = items.map(p=>`<div>• ${p.name} — $${p.price}</div>`).join('');
+    }
+    async function placeOrder(){
+      try{
+        const res = await fetch('http://ecommerce-backend:5000/api/order', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({product_id:1, qty:1})
+        });
+        alert(res.ok ? 'Order placed!' : 'Order failed');
+      }catch(e){ alert('Order failed: '+e.message); }
+    }
+    loadProducts();
+  </script>
+</body>
+</html>
